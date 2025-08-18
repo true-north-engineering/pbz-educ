@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: populate-pvc-job
+spec:
+  parallelism: 1
+  completions: 1
+  activeDeadlineSeconds: 1800
+  backoffLimit: 6
+  template:
+    metadata:
+      name: populate-pvc-job
+    spec:
+      volumes:
+        - name: animal-data
+          persistentVolumeClaim:
+            claimName: animal-data
+      containers:
+      - name: populate-pvc-job
+        image: alpine/curl
+        command: ["curl",  "https://raw.githubusercontent.com/true-north-engineering/pbz-educ-src/refs/heads/main/lab3/names", "-o", "/data/names"]
+        volumeMounts:
+          - name: animal-data
+            mountPath: /data
+      restartPolicy: OnFailure
