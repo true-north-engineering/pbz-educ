@@ -8,7 +8,7 @@ Be aware that these solutions are for ***user50***. Please adjust all paths for 
 
 2. Create internal podman network mynet using bridge driver.
 
-```podman network create -d bridge --internal mynet```
+```podman network create mynet```
 
 3. Create a directory for mysql data in /home/<your_username>/mysql
 
@@ -37,7 +37,7 @@ Be aware that these solutions are for ***user50***. Please adjust all paths for 
 podman exec -it mysql bash
 
 # Command for connecting to the database
-mysql -h localhost -utodo -ptodopassw0rd <mysql_database>
+mysql -h localhost -utodo -ptodopassw0rd todo
 
 # Create the table
 create table Item (id bigint not null auto_increment, description varchar(255), done bool, primary key (id));
@@ -93,11 +93,11 @@ podman inspect todo:latest
     * Set the values od the following environment variables MYSQL_ENV_MYSQL_DATABASE, MYSQL_ENV_MYSQL_USER, MYSQL_ENV_MYSQL_PASSWORD to values you have specified when starting mysql container.
     * Container is attached to mynet network
     * Container image used is todo:latest
-    * Publish port 30080
+    * Publish container port 30080
 
 ```podman run -d -p 30080 --network mynet -e MYSQL_ENV_MYSQL_DATABASE=todo -e MYSQL_ENV_MYSQL_USER=todo -e MYSQL_ENV_MYSQL_PASSWORD=todopassw0rd --name todo todo:latest```
 
-5. Find out the port on which the application is listening.
+5. Find out the port on which the container is listening on the host.
 
 ```podman ps```
 
@@ -125,7 +125,65 @@ Open URL http://box-edu.tn.hr:40589/todo/
 
 5. Browse the Nexus through web interface and find your image.
 
-## Task 4 - Cleanup
+## Task 4 - Build the environment using podman-compose
+
+1. Create compose.yml file for podman-compose in your home folder. The compose.yml shoud:
+    * Define mynet network
+    * Define mysql service from mysql:5.5 image, connected to mynet network, and defined environment variables with the same names and values like in Task 1.
+    * Define todo service from todo:latest image, connected to mynet network, defined environment variables with the same names and values like in Task 2, and exposed port 30080.
+
+Compose file reference -> https://docs.docker.com/reference/compose-file/
+
+```
+cd ~
+vi compose.yml
+```
+
+Contents of compose.yml
+
+```
+services:
+  mysql:
+    image: mysql:5.5
+    environment:
+      MYSQL_DATABASE: todo
+      MYSQL_USER: todo
+      MYSQL_ROOT_PASSWORD: todopassw0rd
+    networks:
+      - mynet
+  todo:
+    image: todo:latest
+    environment:
+      MYSQL_ENV_MYSQL_DATABASE: todo
+      MYSQL_ENV_MYSQL_USER: todo
+      MYSQL_ENV_MYSQL_PASSWORD: todopassw0rd
+    networks:
+      - mynet
+    ports:
+      - 30080
+
+networks:
+  mynet:
+```
+
+2. Start the environment.
+
+```podman-compose up -d```
+
+3. List the created containers and networks with podman command.
+
+```
+podman ps
+podman network ls
+podman logs user0_mysql_1
+podman logs user0_todo_1
+```
+
+4. Stop the environment.
+
+```podman-compose down```
+
+## Task 5 - Cleanup
 
 1. Cleanup everything by stopping the containers, removing them, removing the images and network mynet.
 
@@ -144,44 +202,4 @@ podman images -a
 podman network ls
 podman network rm mynet
 podman network ls
-```
-
-## Task 5 (Optional) - Build todo app using buildah
-
-1. Build the same todo application from Task 2, Step 1 using Buildah and commit the builded image as todo:latest.
-
-```
-cd ~/pbz-educ-src/todo-single
-buildah from --name todobuild node:5
-buildah config --workingdir /home/node/app todobuild
-buildah copy todobuild . /home/node/app
-buildah run todobuild npm install
-buildah config --cmd '["node","app.js"]' todobuild
-buildah commit todobuild todo:latest
-```
-
-2. List the images with podman.
-
-```podman ps```
-
-3. Start the todo app like in task 2.
-
-```podman run -d -p 30080 -e MYSQL_ENV_MYSQL_DATABASE=todo -e MYSQL_ENV_MYSQL_USER=todo -e MYSQL_ENV_MYSQL_PASSWORD=todopassw0rd --name todo todo:latest```
-
-4. Observe the logs of todo app.
-
-```podman logs todo```
-
-5. Access the application through URL.
-
-```podman ps```
-
-Note the port and open URL ```http://box-edu.tn.hr:<port>/todo/```
-
-6. Stop and cleanup everything.
-
-```
-podman stop todo
-podman rm -af
-podman rmi -af
 ```

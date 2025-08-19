@@ -64,9 +64,9 @@ select * from Item;
     * Set the values od the following environment variables MYSQL_ENV_MYSQL_DATABASE, MYSQL_ENV_MYSQL_USER, MYSQL_ENV_MYSQL_PASSWORD to values you have specified when starting mysql container.
     * Container is attached to mynet network
     * Container image used is todo:latest
-    * Publish port 30080
+    * Publish container port 30080
 
-5. Find out the port on which the application is listening.
+5. Find out the port on which the container is listening on the host.
 
 6. Test the app by opening the URL ```http://box-edu.tn.hr:<port>/todo/```. Please note that the last trailing slash (/) is important, so don't omit him.
 
@@ -82,20 +82,21 @@ select * from Item;
 
 5. Browse the Nexus through web interface and find your image.
 
-## Task 4 - Cleanup
+## Task 4 - Build the environment using podman-compose
+
+1. Create compose.yml file for podman-compose in your home folder. The compose.yml shoud:
+    * Define mynet network
+    * Define mysql service from mysql:5.5 image, connected to mynet network, and defined environment variables with the same names and values like in Task 1.
+    * Define todo service from todo:latest image, connected to mynet network, defined environment variables with the same names and values like in Task 2, and exposed port 30080.
+
+Compose file reference -> https://docs.docker.com/reference/compose-file/
+
+2. Start the environment.
+
+3. List the created containers and networks with podman command.
+
+4. Stop the environment.
+
+## Task 5 - Cleanup
 
 1. Cleanup everything by stopping the containers, removing them, removing the images and network mynet.
-
-## Task 5 (Optional) - Build todo app using buildah
-
-1. Build the same todo application from Task 2, Step 1 using Buildah and commit the builded image as todo:latest.
-
-2. List the images with podman.
-
-3. Start the todo app like in task 2.
-
-4. Observe the logs of todo app.
-
-5. Access the application through URL.
-
-6. Stop and cleanup everything.
