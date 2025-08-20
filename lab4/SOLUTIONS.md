@@ -27,17 +27,17 @@ podman build -t todo-frontend:latest -f Containerfile.gen
 
 ## Task 2 - Tekton builds
 
-1. Create an Openshift project called by your username, e.g. user1
+1. Create an Openshift project called by your username, e.g. user0
 
 ```
-oc new-project user1
-oc project user1
+oc new-project user0
+oc project user0
 ```
 
 2. Create ```nexus-docker-auth``` secret that containes authentication data for ```docker-nexus-edu.tn.hr```. Link that secret with ```pipeline``` service account.
 
 ```
-Create nexus-docker-auth secret in user1 project through Openshift web interface or CLI:
+Create nexus-docker-auth secret in user0 project through Openshift web interface or CLI:
 Name: nexus-docker-auth
 Registry server address: docker-nexus-edu.tn.hr
 Username: user
@@ -61,10 +61,10 @@ oc secret link pipeline nexus-docker-auth
         * Github URL to clone is ```https://github.com/true-north-engineering/pbz-educ-src.git```
         * Revision to checkout is taken from the ```revision``` parameter. Hint: ```$(params.revision)```
         * Output workspace should be ```source```
-    * Second task is s2i-java and it sould run after git-clone is successfully done
+    * Second task is s2i-java-1-19-0 and it sould run after git-clone is successfully done
         * Java version should be 11
         * Context path sould be ```todo-api```
-        * Produced image sould be ```docker-nexus-edu.tn.hr/todo-api:<your_username>```
+        * Produced image sould be ```docker-nexus-edu.tn.hr/<your_username/todo-api:latest```
         * Workspace where the source resides is ```source```
 
 ```
@@ -72,7 +72,7 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: todo-api
-  namespace: user1
+  namespace: user0
 spec:
   params:
     - default: main
@@ -81,65 +81,83 @@ spec:
   tasks:
     - name: git-clone
       params:
-        - name: url
-          value: 'https://github.com/true-north-engineering/pbz-educ-src.git'
-        - name: revision
-          value: $(params.revision)
-        - name: refspec
-          value: ''
-        - name: submodules
-          value: 'false'
-        - name: depth
-          value: '1'
-        - name: sslVerify
-          value: 'true'
-        - name: crtFileName
+        - name: CRT_FILENAME
           value: ca-bundle.crt
-        - name: subdirectory
+        - name: HTTP_PROXY
           value: ''
-        - name: sparseCheckoutDirectories
+        - name: HTTPS_PROXY
           value: ''
-        - name: deleteExisting
-          value: 'true'
-        - name: httpProxy
+        - name: NO_PROXY
           value: ''
-        - name: httpsProxy
+        - name: SUBDIRECTORY
           value: ''
-        - name: noProxy
-          value: ''
-        - name: verbose
-          value: 'true'
-        - name: gitInitImage
-          value: 'registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:dd5c8d08d52e304a542921634ebe6b5ff3d63c5f68f6d644e88417859b173ec8'
-        - name: userHome
+        - name: USER_HOME
           value: /home/git
+        - name: DELETE_EXISTING
+          value: 'true'
+        - name: VERBOSE
+          value: 'false'
+        - name: SSL_VERIFY
+          value: 'false'
+        - name: URL
+          value: 'https://github.com/true-north-engineering/pbz-educ-src.git'
+        - name: REVISION
+          value: $(params.revision)
+        - name: REFSPEC
+          value: ''
+        - name: SUBMODULES
+          value: 'true'
+        - name: DEPTH
+          value: '1'
+        - name: SPARSE_CHECKOUT_DIRECTORIES
+          value: ''
       taskRef:
-        kind: ClusterTask
-        name: git-clone
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
       workspaces:
         - name: output
           workspace: source
-    - name: s2i-java
+    - name: s2i-java-1-19-0
       params:
+        - name: IMAGE
+          value: 'docker-nexus-edu.tn.hr/user0/todo-api:latest'
         - name: VERSION
           value: '11'
-        - name: PATH_CONTEXT
-          value: todo-api
-        - name: TLSVERIFY
-          value: 'true'
-        - name: IMAGE
-          value: 'docker-nexus-edu.tn.hr/todo-api:user1'
-        - name: BUILDER_IMAGE
-          value: 'registry.redhat.io/rhel8/buildah@sha256:5c7cd7c9a3d49e8905fc98693f6da605aeafae36bde5622dc78e12f31db3cd59'
-        - name: SKIP_PUSH
-          value: 'false'
         - name: ENV_VARS
           value: []
+        - name: CONTEXT
+          value: todo-api
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: FORMAT
+          value: oci
+        - name: BUILD_EXTRA_ARGS
+          value: ''
+        - name: PUSH_EXTRA_ARGS
+          value: ''
+        - name: SKIP_PUSH
+          value: 'false'
+        - name: TLS_VERIFY
+          value: 'false'
+        - name: VERBOSE
+          value: 'false'
       runAfter:
         - git-clone
       taskRef:
-        kind: ClusterTask
-        name: s2i-java
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: s2i-java-1-19-0
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
       workspaces:
         - name: source
           workspace: source
@@ -154,18 +172,13 @@ spec:
         * Github URL to clone is ```https://github.com/true-north-engineering/pbz-educ-src.git```
         * Revision to checkout is taken from the ```revision``` parameter. Hint: ```$(params.revision)```
         * Output workspace should be ```source```
-    * Second task is s2i-nodejs and it sould run after git-clone is successfully done
-        * NodeJS version should be 16-ubi8
+    * Second task is s2i-nodejs-1-19-0 and it sould run after git-clone is successfully done
+        * NodeJS version should be 18-ubi8
         * Context path sould be ```todo-frontend```
-        * Produced image sould be ```docker-nexus-edu.tn.hr/todo-frontend:<your_username>```
+        * Produced image sould be ```docker-nexus-edu.tn.hr/<your_username/todo-frontend:latest```
         * Workspace where the source resides is ```source```
 
 ```
-apiVersion: tekton.dev/v1
-kind: Pipeline
-metadata:
-  name: todo-frontend
-  namespace: user1
 spec:
   params:
     - default: main
@@ -174,65 +187,85 @@ spec:
   tasks:
     - name: git-clone
       params:
-        - name: url
-          value: 'https://github.com/true-north-engineering/pbz-educ-src.git'
-        - name: revision
-          value: $(params.revision)
-        - name: refspec
-          value: ''
-        - name: submodules
-          value: 'false'
-        - name: depth
-          value: '1'
-        - name: sslVerify
-          value: 'true'
-        - name: crtFileName
+        - name: CRT_FILENAME
           value: ca-bundle.crt
-        - name: subdirectory
+        - name: HTTP_PROXY
           value: ''
-        - name: sparseCheckoutDirectories
+        - name: HTTPS_PROXY
           value: ''
-        - name: deleteExisting
-          value: 'true'
-        - name: httpProxy
+        - name: NO_PROXY
           value: ''
-        - name: httpsProxy
+        - name: SUBDIRECTORY
           value: ''
-        - name: noProxy
-          value: ''
-        - name: verbose
-          value: 'true'
-        - name: gitInitImage
-          value: 'registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:dd5c8d08d52e304a542921634ebe6b5ff3d63c5f68f6d644e88417859b173ec8'
-        - name: userHome
+        - name: USER_HOME
           value: /home/git
+        - name: DELETE_EXISTING
+          value: 'true'
+        - name: VERBOSE
+          value: 'false'
+        - name: SSL_VERIFY
+          value: 'false'
+        - name: URL
+          value: 'https://github.com/true-north-engineering/pbz-educ-src.git'
+        - name: REVISION
+          value: $(params.revision)
+        - name: REFSPEC
+          value: ''
+        - name: SUBMODULES
+          value: 'true'
+        - name: DEPTH
+          value: '1'
+        - name: SPARSE_CHECKOUT_DIRECTORIES
+          value: ''
       taskRef:
-        kind: ClusterTask
-        name: git-clone
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
       workspaces:
         - name: output
           workspace: source
-    - name: s2i-nodejs
+    - name: s2i-nodejs-1-19-0
       params:
-        - name: VERSION
-          value: 16-ubi8
-        - name: PATH_CONTEXT
-          value: todo-frontend
-        - name: TLSVERIFY
-          value: 'true'
         - name: IMAGE
-          value: 'docker-nexus-edu.tn.hr/todo-frontend:user1'
-        - name: BUILDER_IMAGE
-          value: 'registry.redhat.io/rhel8/buildah@sha256:5c7cd7c9a3d49e8905fc98693f6da605aeafae36bde5622dc78e12f31db3cd59'
-        - name: SKIP_PUSH
-          value: 'false'
+          value: 'docker-nexus-edu.tn.hr/user0/todo-frontend:latest'
+        - name: VERSION
+          value: 18-ubi8
+        - name: IMAGE_SCRIPTS_URL
+          value: 'image:///usr/libexec/s2i'
         - name: ENV_VARS
           value: []
+        - name: CONTEXT
+          value: todo-frontend
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: FORMAT
+          value: oci
+        - name: BUILD_EXTRA_ARGS
+          value: ''
+        - name: PUSH_EXTRA_ARGS
+          value: ''
+        - name: SKIP_PUSH
+          value: 'false'
+        - name: TLS_VERIFY
+          value: 'false'
+        - name: VERBOSE
+          value: 'false'
       runAfter:
         - git-clone
       taskRef:
-        kind: ClusterTask
-        name: s2i-nodejs
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: s2i-nodejs-1-19-0
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
       workspaces:
         - name: source
           workspace: source
@@ -246,13 +279,32 @@ spec:
 
 ## Task 3 - Deploy the solution
 
-1. Clone the ```https://github.com/true-north-engineering/pbz-educ-src``` Git repo locally and checkout branch with your username. Check the ```helm/todo``` folder and get yourself familliar with the application Helm chart.
+1. Clone the ```https://github.com/true-north-engineering/pbz-educ-src``` Git repo locally (or on box-edu.tn.hr) and create branch with your username. Check the ```helm/todo``` folder and get yourself familliar with the application Helm chart.
+
+Hint to create the branch with git cli:
+
+```
+git clone https://github.com/true-north-engineering/pbz-educ-src.git
+cd pbz-educ-src
+git config user.email=user@educ.tn.hr
+git config user.name=user
+
+git checkout -b <your_username>
+
+#make changes to files
+
+git add .
+git commit -m "comment"
+git push
+
+# When asked for username enter "user". Password can be found in file /edu/github-token
+```
 
 2. Clone the ```https://github.com/true-north-engineering/pbz-educ-src``` and ***checkout branch with your username***
     * Change the following properties in ```values.yaml```, commit them and push to the Github repo
         * fe.image.tag should contain the tag of your frontend image
         * api.image.tag should contain the tag of your api image
-        * route.host should be ```todo-<your_username>.ocp.pbz.tn.hr```
+        * route.host should be ```todo-<your_username>.ocp-edu.tn.hr```
 
 ```
 api:
@@ -260,7 +312,7 @@ api:
   image:
     repository: docker-nexus-edu.tn.hr/todo-api
     pullPolicy: IfNotPresent
-    tag: "user1"
+    tag: "user0"
 
   imagePullSecrets:
     - name: nexus-docker-auth
@@ -281,9 +333,9 @@ api:
 fe:
   replicaCount: 1
   image:
-    repository: docker-nexus-edu.tn.hr/todo-frontend
+    repository: docker-nexus-edu.tn.hr/user0/todo-frontend
     pullPolicy: IfNotPresent
-    tag: "user1"
+    tag: "user0"
 
   imagePullSecrets:
     - name: nexus-docker-auth
@@ -305,7 +357,7 @@ fe:
 
 route:
   enabled: true
-  host: todo-user1.ocp.pbz.tn.hr
+  host: todo-user0.ocp-edu.tn.hr
 
 mysql:
   auth:
@@ -334,7 +386,7 @@ mysql:
 
 4. Observe the applications in Openshift. Check the application logs and test the application.
 
-```Open the following URL in browser - https://todo-user1.ocp.pbz.tn.hr```
+```Open the following URL in browser - https://todo-user0.ocp-edu.tn.hr```
 
 5. Connect to mysql pod and create the necessary tables:
 

@@ -28,10 +28,10 @@ Example:
         * Github URL to clone is ```https://github.com/true-north-engineering/pbz-educ-src.git```
         * Revision to checkout is taken from the ```revision``` parameter. Hint: ```$(params.revision)```
         * Output workspace should be ```source```
-    * Second task is s2i-java and it sould run after git-clone is successfully done
+    * Second task is s2i-java-1-19-0 and it sould run after git-clone is successfully done
         * Java version should be 11
         * Context path sould be ```todo-api```
-        * Produced image sould be ```docker-nexus-edu.tn.hr/todo-api:<your_username>```
+        * Produced image sould be ```docker-nexus-edu.tn.hr/<your_username/todo-api:latest```
         * Workspace where the source resides is ```source```
 
 4. Create todo-frontend pipeline which has the following properties:
@@ -41,10 +41,10 @@ Example:
         * Github URL to clone is ```https://github.com/true-north-engineering/pbz-educ-src.git```
         * Revision to checkout is taken from the ```revision``` parameter. Hint: ```$(params.revision)```
         * Output workspace should be ```source```
-    * Second task is s2i-nodejs and it sould run after git-clone is successfully done
-        * NodeJS version should be 16-ubi8
+    * Second task is s2i-nodejs-1-19-0 and it sould run after git-clone is successfully done
+        * NodeJS version should be 18-ubi8
         * Context path sould be ```todo-frontend```
-        * Produced image sould be ```docker-nexus-edu.tn.hr/todo-frontend:<your_username>```
+        * Produced image sould be ```docker-nexus-edu.tn.hr/<your_username/todo-frontend:latest```
         * Workspace where the source resides is ```source```
 
 5. Build ```todo-api``` and ```todo-frontend``` applications using Tekton pipelines. Use the VolumeClaimTemplate for persistence.
@@ -53,15 +53,34 @@ Example:
 
 ## Task 3 - Deploy the solution
 
-1. Clone the ```https://github.com/true-north-engineering/pbz-educ-src``` Git repo locally and checkout branch with your username. Check the ```helm/todo``` folder and get yourself familliar with the application Helm chart.
+1. Clone the ```https://github.com/true-north-engineering/pbz-educ-src``` Git repo locally (or on box-edu.tn.hr) and create branch with your username. Check the ```helm/todo``` folder and get yourself familliar with the application Helm chart.
 
-2. Clone the ```https://github.com/true-north-engineering/pbz-educ-src``` and ***checkout branch with your username***
+Hint to create the branch with git cli:
+
+```
+git clone https://github.com/true-north-engineering/pbz-educ-src.git
+cd pbz-educ-src
+git config user.email=user@educ.tn.hr
+git config user.name=user
+
+git checkout -b <your_username>
+
+#make changes to files
+
+git add .
+git commit -m "comment"
+git push
+
+# When asked for username enter "user". Password can be found in file /edu/github-token
+```
+
+2. In the cloned ```https://github.com/true-north-engineering/pbz-educ-src```
     * Change the following properties in ```values.yaml```, commit them and push to the Github repo
         * fe.image.tag should contain the tag of your frontend image
         * api.image.tag should contain the tag of your api image
-        * route.host should be ```todo-<your_username>.ocp.pbz.tn.hr```
+        * route.host should be ```todo-<your_username>.ocp-edu.tn.hr```
 
-3. In Argocd ```https://gitops.ocp.pbz.tn.hr``` create a new application with following properties:
+3. In Argocd ```https://gitops-edu.tn.hr``` create a new application with following properties:
     * Application name should be ```<your_username>-todo```
     * Application project should be ```default```
     * Repository URL should be ```https://github.com/true-north-engineering/pbz-educ-src.git```
