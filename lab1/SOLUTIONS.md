@@ -4,7 +4,7 @@ Be aware that these solutions are for ***user50***. Please adjust all paths for 
 
 ## Task 1 - Create mysql container
 
-1. Go to public DockerHub repo and find mysql 5.5 container image. Go through the documentation and find which environment variables are used for database configuration, especially MYSQL_ROOT_PASSWORD, MYSQL_USER, MYSQL_PASSWORD and MYSQL_DATABASE.
+1. Go to public DockerHub repo and find mysql 8 container image. Go through the documentation and find which environment variables are used for database configuration, especially MYSQL_ROOT_PASSWORD, MYSQL_USER, MYSQL_PASSWORD and MYSQL_DATABASE.
 
 2. Create internal podman network mynet using bridge driver.
 
@@ -20,9 +20,9 @@ Be aware that these solutions are for ***user50***. Please adjust all paths for 
     * Set the values od the following environment variables MYSQL_ROOT_PASSWORD, MYSQL_USER, MYSQL_PASSWORD and MYSQL_DATABASE to values of your choosing
     * Container is attached to mynet network
     * Container mounts /home/<your_username>/mysql on host system to /var/lib/mysql folder in the container
-    * Container image used is mysql:5.5
+    * Container image used is docker.io/mysql:8
 
-```podman run -d --name mysql -e MYSQL_ROOT_PASSWORD=r00tpassw0rd -e MYSQL_USER=todo -e MYSQL_PASSWORD=todopassw0rd -e MYSQL_DATABASE=todo --network mynet -v /home/user50/mysql:/var/lib/mysql:Z mysql:5.5```
+```podman run -d --name mysql -e MYSQL_ROOT_PASSWORD=r00tpassw0rd -e MYSQL_USER=todo -e MYSQL_PASSWORD=todopassw0rd -e MYSQL_DATABASE=todo --network mynet -v /home/user50/mysql:/var/lib/mysql:Z docker.io/mysql:8```
 
 5. List the running containers
 
@@ -53,11 +53,13 @@ select * from Item;
 
 1. The Containerfile should satisfy the following requirements
     * The location of Containerfile should be ~/pbz-educ-src/todo-single/Containerfile
-    * Base image should be node:5
+    * Base image should be node:12
     * WORKDIR should be /home/node/app
     * Copy the contents of nodejs folder into WORKDIR
     * Run ```npm install```
     * Set CMD to run ```node app.js```
+
+Containerfile / Dockerfile reference -> https://docs.docker.com/reference/dockerfile/
 
 ```
 cd ~/pbz-educ-src/todo-single
@@ -67,7 +69,7 @@ vi Containerfile
 Content of the Containerfile:
 
 ```
-FROM node:5
+FROM node:12
 
 WORKDIR /home/node/app
 COPY . /home/node/app
@@ -91,11 +93,12 @@ podman inspect todo:latest
     * Container name is todo
     * Container is running in background (detached mode)
     * Set the values od the following environment variables MYSQL_ENV_MYSQL_DATABASE, MYSQL_ENV_MYSQL_USER, MYSQL_ENV_MYSQL_PASSWORD to values you have specified when starting mysql container.
+    * Set the values od the environment variables MYSQL_ENV_MYSQL_HOST to the name of mysql container and MYSQL_ENV_MYSQL_PORT to 3306
     * Container is attached to mynet network
     * Container image used is todo:latest
     * Publish container port 30080
 
-```podman run -d -p 30080 --network mynet -e MYSQL_ENV_MYSQL_DATABASE=todo -e MYSQL_ENV_MYSQL_USER=todo -e MYSQL_ENV_MYSQL_PASSWORD=todopassw0rd --name todo todo:latest```
+```podman run -d -p 30080 --network mynet -e MYSQL_ENV_MYSQL_DATABASE=todo -e MYSQL_ENV_MYSQL_USER=todo -e MYSQL_ENV_MYSQL_PASSWORD=todopassw0rd -e MYSQL_ENV_MYSQL_HOST=mysql -e MYSQL_ENV_MYSQL_PORT=3306 --name todo todo:latest```
 
 5. Find out the port on which the container is listening on the host.
 
@@ -115,13 +118,13 @@ Open URL http://box-edu.tn.hr:40589/todo/
 
 ```podman login docker-nexus-edu.tn.hr```
 
-3. Tag the todo:latest image with podman to docker-nexus-edu.tn.hr/todo:user50
+3. Tag the todo:latest image with podman to docker-nexus-edu.tn.hr/user50/todo:latest
 
-```podman tag todo:latest docker-nexus-edu.tn.hr/todo:user50```
+```podman tag todo:latest docker-nexus-edu.tn.hr/user50/todo:latest```
 
 4. Push the image to Nexus.
 
-```podman push docker-nexus-edu.tn.hr/todo:user50```
+```podman push docker-nexus-edu.tn.hr/user50/todo:latest```
 
 5. Browse the Nexus through web interface and find your image.
 
@@ -129,7 +132,7 @@ Open URL http://box-edu.tn.hr:40589/todo/
 
 1. Create compose.yml file for podman-compose in your home folder. The compose.yml shoud:
     * Define mynet network
-    * Define mysql service from mysql:5.5 image, connected to mynet network, and defined environment variables with the same names and values like in Task 1.
+    * Define mysql service from mysql:8 image, connected to mynet network, and defined environment variables with the same names and values like in Task 1.
     * Define todo service from todo:latest image, connected to mynet network, defined environment variables with the same names and values like in Task 2, and exposed port 30080.
 
 Compose file reference -> https://docs.docker.com/reference/compose-file/
@@ -144,7 +147,7 @@ Contents of compose.yml
 ```
 services:
   mysql:
-    image: mysql:5.5
+    image: docker.io/mysql:8
     environment:
       MYSQL_DATABASE: todo
       MYSQL_USER: todo
@@ -157,6 +160,8 @@ services:
       MYSQL_ENV_MYSQL_DATABASE: todo
       MYSQL_ENV_MYSQL_USER: todo
       MYSQL_ENV_MYSQL_PASSWORD: todopassw0rd
+      MYSQL_ENV_MYSQL_HOST: todopassw0rd
+      MYSQL_ENV_MYSQL_PORT: 3306
     networks:
       - mynet
     ports:

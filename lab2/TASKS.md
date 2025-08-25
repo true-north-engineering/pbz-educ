@@ -12,26 +12,26 @@ List all projects.
 
 # Lab 2 - Create Project
 
-Create a project for rest of the labs.
+Create a project for rest of the labs. The name of the project must be your designated `userX` username.
 
 Use either Openshift web console, or `oc` command to create a new project named `UserX`, same as your user on day 1.
 
-# Lab 3 - Deploy `PostgreSQL (Ephemeral)` database from template.
+# Lab 3 - Deploy `MySQL (Ephemeral)` database from template.
 
 Login to OpenShift web console.
 
 Choose the `Developer` console from top left dropdown.
 
-Add `PostgreSQL (Ephemeral)` database to your project.
+Add `MySQL (Ephemeral)` database to your project.
 
-Set `Service Name` to `animalsdb`
-Set `Connection Username` to `animal`
-Set `Connection Password` to `4n1m4l!`
-Set `Database Name` to `animals`
+Set `Database Service Name` to `todo-db`
+Set `MySQL Connection Username` to `todo`
+Set `MySQL Connection Password` to `todopassw0rd`
+Set `MySQL Database Name` to `todo`
 
-Leave rest of the fields blank.
+Leave rest of the fields with default values.
 
-Wait for `PostgreSQL (Ephemeral)` to be ready.
+Wait for `MySQL (Ephemeral)` to be ready.
 
 # Lab 4 - Create image pull secret
 
@@ -49,7 +49,7 @@ user: user
 password: XXX
 ```
 
-# Lab 5 - Deploy `animals` application using `oc` command
+# Lab 5 - Deploy `todo` application using `oc` command
 
 `animals` is an aplication that tells you what animals live on your servers. When deploying app you can choose what animal you want to check by setting `ANIMAL` environment variable, and if that animal exists, it will tell you their names.
 
