@@ -112,9 +112,9 @@ Open URL http://box-edu.tn.hr:30501/todo/
 
 ## Task 3 - Push the image to Nexus
 
-1. Go to https://nexus-edu.tn.hr and login with username admin. Password is stored on the ```box-edu.tn.hr``` in file ```/edu/nexus-credentials```. You can view the content of this file with command ```cat /edu/nexus-credentials```
+1. Go to https://nexus-edu.tn.hr and login with username user. Password is stored on the ```box-edu.tn.hr``` in file ```/edu/nexus-credentials```. You can view the content of this file with command ```cat /edu/nexus-credentials```
 
-2. Login with podman to nexus-edu.tn.hr.
+2. Login with podman to docker-nexus-edu.tn.hr.
 
 ```podman login docker-nexus-edu.tn.hr```
 
