@@ -104,7 +104,7 @@ podman inspect todo:latest
 
 ```podman ps```
 
-Note the PORTS column of todo container. It has a value like ```0.0.0.0:30501->30080/tcp```. This means that the host port 30501 is redirected to the container's port 30080. In this case the app is awailable outside on port 30501.
+Note the PORTS column of todo container. It has a value like ```0.0.0.0:30501->30080/tcp```. This means that the host port 30501 is redirected to the container's port 30080. In this case the app is available outside on port 30501.
 
 6. Test the app by openhing the URL ```http://box-edu.tn.hr:<port>/todo/```. Please note that the last trailing slash (/) is important, so don't omit him.
 
