@@ -96,19 +96,19 @@ podman inspect todo:latest
     * Set the values od the environment variables MYSQL_ENV_MYSQL_HOST to the name of mysql container and MYSQL_ENV_MYSQL_PORT to 3306
     * Container is attached to mynet network
     * Container image used is todo:latest
-    * Publish container port 30080
+    * Publish container port 30080 on any host port reserved to your user (e.g. for user10, the range is 30**10**0-30**10**9)
 
-```podman run -d -p 30080 --network mynet -e MYSQL_ENV_MYSQL_DATABASE=todo -e MYSQL_ENV_MYSQL_USER=todo -e MYSQL_ENV_MYSQL_PASSWORD=todopassw0rd -e MYSQL_ENV_MYSQL_HOST=mysql -e MYSQL_ENV_MYSQL_PORT=3306 --name todo todo:latest```
+```podman run -d -p 30080:30501 --network mynet -e MYSQL_ENV_MYSQL_DATABASE=todo -e MYSQL_ENV_MYSQL_USER=todo -e MYSQL_ENV_MYSQL_PASSWORD=todopassw0rd -e MYSQL_ENV_MYSQL_HOST=mysql -e MYSQL_ENV_MYSQL_PORT=3306 --name todo todo:latest```
 
 5. Find out the port on which the container is listening on the host.
 
 ```podman ps```
 
-Note the PORTS column of todo container. It has a value like ```0.0.0.0:40589->30080/tcp```. This means that the host port 40589 is redirected to the container's port 30080. In this case the app is awailable outside on port 40589.
+Note the PORTS column of todo container. It has a value like ```0.0.0.0:30501->30080/tcp```. This means that the host port 30501 is redirected to the container's port 30080. In this case the app is awailable outside on port 30501.
 
 6. Test the app by openhing the URL ```http://box-edu.tn.hr:<port>/todo/```. Please note that the last trailing slash (/) is important, so don't omit him.
 
-Open URL http://box-edu.tn.hr:40589/todo/
+Open URL http://box-edu.tn.hr:30501/todo/
 
 ## Task 3 - Push the image to Nexus
 
@@ -133,7 +133,7 @@ Open URL http://box-edu.tn.hr:40589/todo/
 1. Create compose.yml file for podman-compose in your home folder. The compose.yml shoud:
     * Define mynet network
     * Define mysql service from mysql:8 image, connected to mynet network, and defined environment variables with the same names and values like in Task 1.
-    * Define todo service from todo:latest image, connected to mynet network, defined environment variables with the same names and values like in Task 2, and exposed port 30080.
+    * Define todo service from todo:latest image, connected to mynet network, defined environment variables with the same names and values like in Task 2, and exposed container port 30080 to any host port reserved for your user.
 
 Compose file reference -> https://docs.docker.com/reference/compose-file/
 
@@ -165,7 +165,7 @@ services:
     networks:
       - mynet
     ports:
-      - 30080
+      - 30080:30501
 
 networks:
   mynet:

@@ -23,22 +23,22 @@ Use either Openshift web console, or `oc` command to create a new project named 
 $ oc new-project userX
 ```
 
-# Lab3 - Deploy `PostgreSQL (Ephemeral)` database from template.
+# Lab 3 - Deploy `MySQL (Ephemeral)` database from template.
 
 Login to OpenShift web console.
 
 Choose the `Developer` console from top left dropdown.
 
-Add `PostgreSQL (Ephemeral)` database to your project.
+Add `MySQL (Ephemeral)` database to your project.
 
-Set `Service Name` to `animalsdb`
-Set `Connection Username` to `animal`
-Set `Connection Password` to `4n1m4l!`
-Set `Database Name` to `animals`
+Set `Database Service Name` to `todo-db`
+Set `MySQL Connection Username` to `todo`
+Set `MySQL Connection Password` to `todopassw0rd`
+Set `MySQL Database Name` to `todo`
 
-Leave rest of the fields blank.
+Leave rest of the fields with default values.
 
-Wait for `PostgreSQL (Ephemeral)` to be ready.
+Wait for `MySQL (Ephemeral)` to be ready.
 
 Run:
 ```
@@ -46,12 +46,13 @@ $ oc get pods
 ```
 And wait for output similar to:
 ```
-NAME                                 READY   STATUS      RESTARTS   AGE
-animalsdb-1-q9lm7                    1/1     Running     0          3h20m
+NAME                   READY   STATUS      RESTARTS   AGE
+todo-db-1-7vlq4        1/1     Running     0          3m
 ```
 `animalsdb` pod should be in `Runnning` state.
 
-# Lab4 - Create image pull secret
+
+# Lab 4 - Create image pull secret
 
 Login to OpenShift console.
 
@@ -62,129 +63,155 @@ Choose `Create` and select `Image pull secret` from dropdown menu.
 Use following parameters
 ```
 name: nexus-pull-secret
-url: docker-nexus-edu.tn.hr`
-user: admin
-password: <user password from day1>
+url: docker-nexus-edu.tn.hr
+user: user
+password: XXX
 ```
 
-# Lab5 - Deploy `animals` application using `oc` command
+# Lab 5 - Deploy `todo-single` application using `oc` command or through OpenShift Web Interface
 
-`animals` is an aplication that tells you what animals live on your servers. When deploying app you can choose what animal you want to check by setting `ANIMAL` environment variable, and if that animal exists, it will tell you their names.
 
-To know whether animal exists, it checks in PostgreSQL database you just created. Let's check if there are any cats.
+To deploy the application through oc command, create a deployment file using template below.
+If you are using OpenShift web interface, use the values from the template in appropriate fields.
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: user50
+  name: todo-single
+spec:
+  selector:
+    matchLabels:
+      app: todo-single
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: todo-single
+    spec:
+      containers:
+        - name: todo
+          image: docker-nexus-edu.tn.hr/edu/todo-single:latest
+          ports:
+            - containerPort: 30080
+              protocol: TCP
+      imagePullSecrets:
+        - name: nexus-pull-secret
+```
 
 Create the deployment using oc command:
 ```
-$ oc apply -f animals-cat-deployment.yaml
+$ oc apply -f <file>
 ```
 
-# Lab 6 - Expose `animals` application
+# Lab 6 - Expose `todo-single` application
 
-Use `oc` command to expose `animals` application.
+Use `oc` command to expose `animals` application. Alternatively, you can use OpenShift web interface to do so.
+
+Once deployment is exposed, find the service that was created using `oc` comand and in web interface.
+
 ```
-$ oc expose deployment cat
+$ oc expose deployment todo-single
 ```
 Once deployment is exposed, find the service that was created using `oc` comand and in web interface.
 ```
 $ oc get services
 ```
 
-# Lab 7 - Allow external acces for `animals` application with a route
+# Lab 7 - Allow external acces for `todo-single` application with a route
 
-Use either web console or oc command to create a route for `animals` application.
+Use either web console or oc command to create a route for `todo-single` application. The route should have the following hostname `todo-single-<userX>.ocp-edu.tn.hr
+
+Once you have the route created, note the url that was created.
+
 ```
-$ oc expose service cat
+$ oc expose service todo-single --hostname todo-single-user50.ocp-edu.tn.hr
 ```
 Once you have the route created, note the url that was created.
 ```
 $ oc get routes
 ```
-# Lab 8 - Call `animals` application
 
-Open the url from `animals` route in your browser and see the result.
-In previous lab you should get output similar to:
-```
-NAME   HOST/PORT                  PATH   SERVICES   PORT   TERMINATION   WILDCARD
-cat    cat-userX.ocp.pbz.tn.hr          cat        5000                 None
-```
-In this case `cat-userX.ocp.pbz.tn.hr` is the url to service. Open it in web browser to get the result:
-```
-It's a cat named Sundance living on cat-d77c74f76-rnqpd.
-```
-Each time you call the service you get a different name. The `cat-d77c74f76-rnqpd` in exmaple is the name of the pod that served the request.
+# Lab 8 - Call `todo-single` application and correct the problem by adding env vars from secret
 
-You can do the same thing in console using curl:
+Open the url from `todo-single` route in your browser and test the application. Observe applications log and resolve the problems.
+
+Hint: Recall the lab1 and that the todo-single app needs certain environment variables which tells the application where the database is and how to connect to it, its credentails etc. Add these variables through OpenShift web interface. The database template which you used to create it alse creates a secret with the connection parameters. Adjust the deployment so it uses this secret and the values in it for environment variables. Also, you will need to connect to the database pod and create Items table.
 ```
-$ curl http://animals-userX.ocp.pbz.tn.hr/
-It's a cat named Lucy living on cat-d77c74f76-rnqpd.
+mysql -h localhost -utodo -ptodopassw0rd todo
+create table Item (id bigint not null auto_increment, description varchar(255), done bool, primary key (id));
 ```
 
-# Lab 9 - Add environmet variables from secret
-
-When you deployed your `PostgreSQL` database, a `secret` with the same name was created. Inside that secret are parameters to connect to DB.
-
-Open the deployment config of `animals` application.
-
-Under environment tab replace static environment variables with those from `PostgreSQL` secret.
-
-Compare the new `yaml` configuration with your initial deployment file.
-
-You should see new config in yaml file:
+To add env vars modify the todo-single deployment yaml and add the `env` section:
 ```
-            - name: DB_USER
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: user50
+  name: todo-single
+spec:
+  selector:
+    matchLabels:
+      app: todo-single
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: todo-single
+    spec:
+      containers:
+        - name: todo
+          image: docker-nexus-edu.tn.hr/edu/todo-single:latest
+          ports:
+            - containerPort: 30080
+              protocol: TCP
+          env:
+            - name: MYSQL_ENV_MYSQL_HOST
+              value: todo-db
+            - name: MYSQL_ENV_MYSQL_PORT
+              value: '3306'
+            - name: MYSQL_ENV_MYSQL_DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: animalsdb
-                  key: database-user
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: animalsdb
-                  key: database-password
-            - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: animalsdb
+                  name: todo-db
                   key: database-name
+            - name: MYSQL_ENV_MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: todo-db
+                  key: database-user
+            - name: MYSQL_ENV_MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: todo-db
+                  key: database-password
+      imagePullSecrets:
+        - name: nexus-pull-secret
 ```
-# Lab 10 - Add configurations from configmap
 
-Now that we have database config from secret, externalize rest of the config by creating a config map.
+# Lab 9 - Call `todo-single` application again and see if it works
 
-Add following values to configmap:
-```
-ANIMAL
-DB_HOST
-DB_PORT
-```
-You can find the configmap in git repository:
-```
-$ oc apply -f animals-cat-configmap.yaml
-```
-Add the values from configmap to `animals` application pod.
+# Lab 10 - Deployment strategies
 
-Remove current environment variables (`ANIMAL`, `DB_HOST`, DB_PORT`), and add the new entry in deployment:
-```
-          envFrom:
-            - configMapRef:
-                name: cat
-```
-# Lab 11 - Deployment strategies
+Increase the replica count of `todo-single` app to 3. Then start new rollout of deployment. Observe pods and notice how for each new pod starting, an old one is destroyed.
 
-Increase the replica count of `animals` app to 3.
+Now change strategy to Recreate and start another rollot. Notice that this time all of the old pods get destroyed before new pods are created.
+
+Scale the `todo-single` deployment back to 1 replicas.
+
 ```
-$ oc scale deployment cat --replicas 3
+$ oc scale deployment todo-single --replicas 3
 ```
 Then start new rollout of deployment.
 ```
-$ oc rollout restart deployment cat
+$ oc rollout restart deployment todo-single
 ```
 Observe pods and notice how for each new pod starting, an old one is destroyed.
 
 Now change strategy to Recreate.
-Edit the `cat` deployment:
+Edit the `todo-single` deployment:
 ```
-$ oc edit deployment cat
+$ oc edit deployment todo-single
 ```
 Replace:
 ```
@@ -201,61 +228,11 @@ With:
 ```
 Start another rollout.
 ```
-$ oc rollout restart deployment cat
+$ oc rollout restart deployment todo-single
 ```
 Notice that this time all of the old pods get destroyed before new pods are created.
 
-Scale the `cat` pod replicas to 1.
+Scale the `todo-single` pod replicas to 1.
 ```
-$ oc scale deployment cat --replicas 1
+$ oc scale deployment todo-single --replicas 1
 ```
-
-# Lab 12 - Restart postgresql database
-
-Restart the database by deleting it's pod.
-
-Find the pod name with:
-```
-$ oc get pods
-NAME                                 READY   STATUS      RESTARTS   AGE
-animalsdb-1-bjp6m                    1/1     Running     0          21m
-```
-Delete the pod:
-```
-$ oc delete pod animalsdb-1-bjp6m
-```
-
-Try calling `animals` app and see the result.
-```
-$ curl http://cat-user49.ocp.pbz.tn.hr/                                                                                                                                             
-There is no cat living on cat-65dc89cb58-b7nb8.
-```
-
-The database we created is `ephemeral` so every time we restart the database, we loose all the data.
-
-# Lab 13 - Create a persistent volume claim
-
-Each time `animals` app is started it creates the db if it's missing and populates it with names from `/app/names' file inside container. We will replace that file with our own list of names and repopulate the database.
-
-Create a `Persistent Volume Claim` named `animal-data`. Use `ibmc-file-bronze-gid` storage class and `rwx` access mode, the volume can be small, 100MiB is more than enough.
-```
-$ oc apply -f animals-cat-pvc.yaml
-```
-
-# Lab 14 - Populate volume with data
-
-Each time `animals` app is started it creates the db if it's missing and populates it with names from `/app/data/names` file inside container. We will replace that file with our own list of names and repopulate the database. A file has been pepared for you in github repo at `https://raw.githubusercontent.com/true-north-engineering/pbz-educ/refs/heads/main/lab3/names`, but you can use your own.
-
-Create a job that uses `alpine/curl` image to download the names file into `PVC` you created before.
-```
-$ oc apply -f populate-pvc-job.yaml
-```
-
-# Lab 15 - Mount the volume into animals container
-
-Mount the volume with your custom names into `animals` app pod under `/app/data/` path. Changing deployment will automatically initiate restarting of pod.
-```
-oc set volume deployment cat --add --name=animal-data --type=persistentVolumeClaim --claim-name=animal-data --mount-path=/app/data
-```
-
-Once restarted try calling the app again and see that names are now those in the new file.

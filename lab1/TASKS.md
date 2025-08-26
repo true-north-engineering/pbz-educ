@@ -67,7 +67,7 @@ Containerfile / Dockerfile reference -> https://docs.docker.com/reference/docker
     * Set the values od the environment variables MYSQL_ENV_MYSQL_HOST to the name of mysql container and MYSQL_ENV_MYSQL_PORT to 3306
     * Container is attached to mynet network
     * Container image used is todo:latest
-    * Publish container port 30080
+    * Publish container port 30080 on any host port reserved to your user (e.g. for user10, the range is 30**10**0-30**10**9)
 
 5. Find out the port on which the container is listening on the host.
 
@@ -90,7 +90,7 @@ Containerfile / Dockerfile reference -> https://docs.docker.com/reference/docker
 1. Create compose.yml file for podman-compose in your home folder. The compose.yml shoud:
     * Define mynet network
     * Define mysql service from docker.io/mysql:8 image, connected to mynet network, and defined environment variables with the same names and values like in Task 1.
-    * Define todo service from todo:latest image, connected to mynet network, defined environment variables with the same names and values like in Task 2, and exposed port 30080.
+    * Define todo service from todo:latest image, connected to mynet network, defined environment variables with the same names and values like in Task 2, and exposed container port 30080 to any host port reserved for your user.
 
 Compose file reference -> https://docs.docker.com/reference/compose-file/
 

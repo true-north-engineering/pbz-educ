@@ -1,9 +1,0 @@
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: cat
-data:
-  ANIMAL: cat
-  DB_HOST: animalsdb
-  DB_PORT: '5432'
-
