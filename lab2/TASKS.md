@@ -94,7 +94,7 @@ Once deployment is exposed, find the service that was created using `oc` comand 
 
 # Lab 7 - Allow external acces for `todo-single` application with a route
 
-Use either web console or oc command to create a route for `todo-single` application. The route should have the following hostname `todo-single-<userX>.ocp-edu.tn.hr
+Use either web console or oc command to create a route for `todo-single` application. The route should have the following hostname `todo-single-<userX>.ocp-edu.tn.hr`
 
 Once you have the route created, note the url that was created.
 
