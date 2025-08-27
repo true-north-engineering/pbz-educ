@@ -21,7 +21,7 @@ Example:
 
 2. Create ```nexus-docker-auth``` secret that containes authentication data for ```docker-nexus-edu.tn.hr```. Link that secret with ```pipeline``` service account.
 
-3. Connect to the Openshift console. In project pbz-cicd you have Tekton pipeline examples. Copy them to your project.
+3. Connect to the Openshift console. `pbz-cicd` project contains Tekton pipeline examples. Copy them to your project.
 
 4. Create todo-api pipeline which has the following properties:
     * Define one parameter ```revision``` which will hold the git branch or commit sha of the code to clone.
