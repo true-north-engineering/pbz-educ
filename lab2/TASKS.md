@@ -6,7 +6,7 @@ In top right corner, click on your `Username` and select `Copy login command`.
 
 Open terminal and use `oc` to login into cluster.
 
-Check your ID by running `oc whami`.
+Check your ID by running `oc whoami`.
 
 List all projects.
 
