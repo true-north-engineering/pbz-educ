@@ -106,7 +106,7 @@ $ oc apply -f <file>
 
 # Lab 6 - Expose `todo-single` application
 
-Use `oc` command to expose `animals` application. Alternatively, you can use OpenShift web interface to do so.
+Use `oc` command to expose `todo-single` application. Alternatively, you can use OpenShift web interface to do so.
 
 Once deployment is exposed, find the service that was created using `oc` comand and in web interface.
 
