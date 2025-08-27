@@ -111,10 +111,10 @@ create table Item (id bigint not null auto_increment, description varchar(255), 
 
 # Lab 9 - Call `todo-single` application again and see if it works
 
-# Lab 11 - Deployment strategies
+# Lab 10 - Deployment strategies
 
 Increase the replica count of `todo-single` app to 3. Then start new rollout of deployment. Observe pods and notice how for each new pod starting, an old one is destroyed.
 
-Now change strategy to Recreate and start another rollot. Notice that this time all of the old pods get destroyed before new pods are created.
+Now change strategy to Recreate and start another rollout. Notice that this time all of the old pods get destroyed before new pods are created.
 
 Scale the `todo-single` deployment back to 1 replicas.
