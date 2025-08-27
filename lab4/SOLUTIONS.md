@@ -52,9 +52,9 @@ oc create secret docker-registry nexus-docker-auth --docker-server=docker-nexus-
 oc secret link pipeline nexus-docker-auth
 ```
 
-2. Connect to the Openshift console. In project ```pbz-cicd``` you have Tekton pipeline examples. Copy them to your project.
+3. Connect to the Openshift console. In project ```pbz-cicd``` you have Tekton pipeline examples. Copy them to your project.
 
-3. Create todo-api pipeline which has the following properties:
+4. Create todo-api pipeline which has the following properties:
     * Define one parameter ```revision``` which will hold the git branch or commit sha of the code to clone.
     * Define one workspace ```source``` which represents the workspace (persistent volume) where the source code will be cloned locally.
     * First task is git-clone:
@@ -165,7 +165,7 @@ spec:
     - name: source
 ```
 
-4. Create todo-frontend pipeline which has the following properties:
+5. Create todo-frontend pipeline which has the following properties:
     * Define one parameter ```revision``` which will hold the git branch or commit sha of the code to clone.
     * Define one workspace ```source``` which represents the workspace (persistent volume) where the source code will be cloned locally.
     * First task is git-clone:
@@ -273,9 +273,9 @@ spec:
     - name: source
 ```
 
-5. Build ```todo-api``` and ```todo-frontend``` applications using Tekton pipelines. Use the VolumeClaimTemplate for persistence.
+6. Build ```todo-api``` and ```todo-frontend``` applications using Tekton pipelines. Use the VolumeClaimTemplate for persistence.
 
-6. Check the images in Nexus.
+7. Check the images in Nexus.
 
 ## Task 3 - Deploy the solution
 
