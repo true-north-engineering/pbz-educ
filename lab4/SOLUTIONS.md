@@ -52,7 +52,7 @@ oc create secret docker-registry nexus-docker-auth --docker-server=docker-nexus-
 oc secret link pipeline nexus-docker-auth
 ```
 
-3. Connect to the Openshift console. ```pbz-cicd``` project contains Tekton pipeline examples. Copy them to your project.
+3. Connect to the Openshift console. There is a project named ```pbz-cicd``` that contains Tekton pipeline examples. Copy them to your project.
 
 4. Create todo-api pipeline which has the following properties:
     * Define one parameter ```revision``` which will hold the git branch or commit sha of the code to clone.
