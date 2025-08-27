@@ -37,7 +37,7 @@ Wait for `MySQL (Ephemeral)` to be ready.
 
 Login to OpenShift console.
 
-Select secrets in either the administrator console under workloads, or developer console at bottom of menu.
+Select secrets in either the administrator console under workloads, or developer console at the bottom of menu.
 
 Choose `Create` and select `Image pull secret` from dropdown menu.
 
