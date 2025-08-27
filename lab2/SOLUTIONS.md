@@ -56,7 +56,7 @@ todo-db-1-7vlq4        1/1     Running     0          3m
 
 Login to OpenShift console.
 
-Select secrets in ether administrator console under workloads, or developer console at bottom of menu.
+Select secrets in either the administrator console under workloads, or developer console at bottom of menu.
 
 Choose `Create` and select `Image pull secret` from dropdown menu.
 
