@@ -13,7 +13,7 @@ Example:
 
 2. Generate Containerfile for source in ```pbz-educ-src/todo-frontend``` based on the builder image ```registry.access.redhat.com/ubi8/nodejs-16:latest```
 
-3. Build the container image from the generated Containerdile
+3. Build the container image from the generated Containerfile
 
 ## Task 2 - Tekton builds
 
