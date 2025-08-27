@@ -21,7 +21,9 @@ Example:
 
 2. Create ```nexus-docker-auth``` secret that containes authentication data for ```docker-nexus-edu.tn.hr```. Link that secret with ```pipeline``` service account.
 
-3. Create todo-api pipeline which has the following properties:
+3. Connect to the Openshift console. In project pbz-cicd you have Tekton pipeline examples. Copy them to your project.
+
+4. Create todo-api pipeline which has the following properties:
     * Define one parameter ```revision``` which will hold the git branch or commit sha of the code to clone.
     * Define one workspace ```source``` which represents the workspace (persistent volume) where the source code will be cloned locally.
     * First task is git-clone:
@@ -34,7 +36,7 @@ Example:
         * Produced image sould be ```docker-nexus-edu.tn.hr/<your_username/todo-api:latest```
         * Workspace where the source resides is ```source```
 
-4. Create todo-frontend pipeline which has the following properties:
+5. Create todo-frontend pipeline which has the following properties:
     * Define one parameter ```revision``` which will hold the git branch or commit sha of the code to clone.
     * Define one workspace ```source``` which represents the workspace (persistent volume) where the source code will be cloned locally.
     * First task is git-clone:
@@ -47,9 +49,9 @@ Example:
         * Produced image sould be ```docker-nexus-edu.tn.hr/<your_username/todo-frontend:latest```
         * Workspace where the source resides is ```source```
 
-5. Build ```todo-api``` and ```todo-frontend``` applications using Tekton pipelines. Use the VolumeClaimTemplate for persistence.
+6. Build ```todo-api``` and ```todo-frontend``` applications using Tekton pipelines. Use the VolumeClaimTemplate for persistence.
 
-6. Check the images in Nexus.
+7. Check the images in Nexus.
 
 ## Task 3 - Deploy the solution
 
