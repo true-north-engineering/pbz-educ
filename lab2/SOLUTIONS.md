@@ -134,7 +134,7 @@ $ oc get routes
 
 # Lab 8 - Call `todo-single` application and correct the problem by adding env vars from secret
 
-Test the application by opening the URL ```<OpenShift todo-single Route URl>/todo/```. Please note that the last trailing slash (/) is important, so don't omit him. 
+Test the application by opening the URL ```todo-single-user50.ocp-edu.tn.hr/todo/```. Please note that the last trailing slash (/) is important, so don't omit him. 
 Observe applications log and resolve the problems. 
 
 Hint: Recall the lab1 and that the todo-single app needs certain environment variables which tells the application where the database is and how to connect to it, its credentails etc. Add these variables through OpenShift web interface. The database template which you used to create it alse creates a secret with the connection parameters. Adjust the deployment so it uses this secret and the values in it for environment variables. Also, you will need to connect to the database pod and create Items table.
