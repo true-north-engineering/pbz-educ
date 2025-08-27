@@ -18,7 +18,7 @@ cd ~/pbz-educ-src/todo-frontend
 s2i build --as-dockerfile ../Containerfile.gen . registry.access.redhat.com/ubi8/nodejs-16:latest
 ```
 
-3. Build the container image from the generated Containerdile
+3. Build the container image from the generated Containerfile
 
 ```
 cd ~/pbz-educ-src
