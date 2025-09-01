@@ -49,7 +49,7 @@ And wait for output similar to:
 NAME                   READY   STATUS      RESTARTS   AGE
 todo-db-1-7vlq4        1/1     Running     0          3m
 ```
-`animalsdb` pod should be in `Runnning` state.
+`todo-db-1-...` pod should be in `Runnning` state.
 
 
 # Lab 4 - Create image pull secret
