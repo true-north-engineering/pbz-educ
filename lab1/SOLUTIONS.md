@@ -17,7 +17,7 @@ Be aware that these solutions are for ***user50***. Please adjust all paths for 
 4. Create container which has the following properties:
     * Container name is mysql
     * Container is running in background (detached mode)
-    * Set the values od the following environment variables MYSQL_ROOT_PASSWORD, MYSQL_USER, MYSQL_PASSWORD and MYSQL_DATABASE to values of your choosing
+    * Set the values of the following environment variables MYSQL_ROOT_PASSWORD, MYSQL_USER, MYSQL_PASSWORD and MYSQL_DATABASE to values of your choosing
     * Container is attached to mynet network
     * Container mounts /home/<your_username>/mysql on host system to /var/lib/mysql folder in the container
     * Container image used is docker.io/mysql:8
@@ -89,11 +89,11 @@ podman images
 podman inspect todo:latest
 ```
 
-4. Create container with builded image. The container should have the following properties:
+4. Create container with built image. The container should have the following properties:
     * Container name is todo
     * Container is running in background (detached mode)
-    * Set the values od the following environment variables MYSQL_ENV_MYSQL_DATABASE, MYSQL_ENV_MYSQL_USER, MYSQL_ENV_MYSQL_PASSWORD to values you have specified when starting mysql container.
-    * Set the values od the environment variables MYSQL_ENV_MYSQL_HOST to the name of mysql container and MYSQL_ENV_MYSQL_PORT to 3306
+    * Set the values of the following environment variables MYSQL_ENV_MYSQL_DATABASE, MYSQL_ENV_MYSQL_USER, MYSQL_ENV_MYSQL_PASSWORD to values you have specified when starting mysql container.
+    * Set the values of the environment variables MYSQL_ENV_MYSQL_HOST to the name of mysql container and MYSQL_ENV_MYSQL_PORT to 3306
     * Container is attached to mynet network
     * Container image used is todo:latest
     * Publish container port 30080 on any host port reserved to your user (e.g. for user10, the range is 30**10**0-30**10**9)
@@ -106,7 +106,7 @@ podman inspect todo:latest
 
 Note the PORTS column of todo container. It has a value like ```0.0.0.0:30501->30080/tcp```. This means that the host port 30501 is redirected to the container's port 30080. In this case the app is available outside on port 30501.
 
-6. Test the app by opening the URL ```http://box-edu.tn.hr:<port>/todo/```. Please note that the last trailing slash (/) is important, so don't omit him.
+6. Test the app by opening the URL ```http://box-edu.tn.hr:<port>/todo/```. Please note that the last trailing slash (/) is important, so don't omit it.
 
 Open URL http://box-edu.tn.hr:30501/todo/
 
@@ -130,7 +130,7 @@ Open URL http://box-edu.tn.hr:30501/todo/
 
 ## Task 4 - Build the environment using podman-compose
 
-1. Create compose.yml file for podman-compose in your home folder. The compose.yml shoud:
+1. Create compose.yml file for podman-compose in your home folder. The compose.yml should:
     * Define mynet network
     * Define mysql service from mysql:8 image, connected to mynet network, and defined environment variables with the same names and values like in Task 1.
     * Define todo service from todo:latest image, connected to mynet network, defined environment variables with the same names and values like in Task 2, and exposed container port 30080 to any host port reserved for your user.
