@@ -87,7 +87,7 @@ Containerfile / Dockerfile reference -> https://docs.docker.com/reference/docker
 
 ## Task 4 - Build the environment using podman-compose
 
-1. Create compose.yml file for podman-compose in your home folder. The compose.yml shoud:
+1. Create compose.yml file for podman-compose in your home folder. The compose.yml should:
     * Define mynet network
     * Define mysql service from docker.io/mysql:8 image, connected to mynet network, and defined environment variables with the same names and values like in Task 1.
     * Define todo service from todo:latest image, connected to mynet network, defined environment variables with the same names and values like in Task 2, and exposed container port 30080 to any host port reserved for your user.
