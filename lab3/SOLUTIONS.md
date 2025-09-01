@@ -133,7 +133,7 @@ Verify your implementation with following steps:
 2) run the app with `mvn spring-boot:run` and, again, send the request to `http://localhost:8080/api/profile`. Did the message change?
 
 
-## Task 6 - liveness and healthness probes
+## Task 5 - liveness and healthness probes
 
 Open `application.properties`, and add the following configuration:
 
@@ -194,11 +194,11 @@ Everything is running nicely. Let's break it. The easiest way to do that is to s
 
 Run the `podman-compose up -d` command again, wait for database to reestablish its connection and send the request to `http://localhost:8080/actuator/health`. Verify that everything is back to normal.
 
-Now we will write some probes ourselves. Go to the `tn.pbz.educ.lab3.resource` package and create three classes: `AlwaysUpHealthIndicator`, `AlwaysDownHealthIndicator` and `DatabasereadinessHealthIndicator`. They should all implement the `HealthIndicator` interface.
+Now we will write some probes ourselves. Go to the `tn.pbz.educ.lab3.resource` package and create three classes: `AlwaysUpHealthIndicator`, `AlwaysDownHealthIndicator` and `DatabasereadinessIndicator`. They should all implement the `HealthIndicator` interface.
 
 1) `AlwaysUpHealthIndicator` should be implemented in a way that it always returns `"status": "UP"` response
 2) `AlwaysDownHealthIndicator` should be implemented in a way that it always returns `"status": "DOWN"` response
-3) `DatabseReadinessHealthIndicator` will be our custom database readiness probe implementation. Implement it so that it runs a query `SELECT COUNT(*) FROM person WHERE id = 1` and that it gives following responses based on the result:
+3) `DatabseReadinessIndicator` will be our custom database readiness probe implementation. Implement it so that it runs a query `SELECT COUNT(*) FROM person` and that it gives following responses based on the result:
 ```
 {
 	"status": "UP",
@@ -255,9 +255,9 @@ public class DatabaseReadinessIndicator implements HealthIndicator {
   public Health health() {
     try {
       // Run a lightweight query
-      Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM person WHERE id = 1", Integer.class);
+      Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM person", Integer.class);
 
-      if (result != null && result == 1) {
+      if (result != null && result >= 0) {
         return Health.up().withDetail("database", "Ready").build();
       } else {
         return Health.down().withDetail("database", "Unexpected result").build();
@@ -270,4 +270,100 @@ public class DatabaseReadinessIndicator implements HealthIndicator {
 ```
 
 
-Once you have implemented these three classes, run the application, send the request to `http://localhost:8080/actuator/health` and check the response.
+Once you have implemented these three classes, run the application, send the request to `http://localhost:8080/actuator/health` and check the response. If your `DatabaseReadinessIndicator` is down, don't worry, it should be. We still don't have the `Person` table. Create it with following query:
+
+```
+CREATE TABLE IF NOT EXISTS person (
+    `id`   BIGINT         NOT NULL AUTO_INCREMENT comment 'id identifier for this table',
+    `name` VARCHAR(255)   NOT NULL comment 'the person name',
+    `age`  INT            NOT NULL comment 'the person age',
+    PRIMARY KEY (`id`)
+);
+```
+
+Once you create the table, send the `actuator/health` request again and check the response. `DatabaseReadinessIndicator` should be okay. The only problem with the probes should be in `AlwaysDownHealthIndicator`, but we designed it to be that way. We can remove it now by deleting the class.
+
+## Task 6 - application container
+
+Go to `Dockerfile` file, you will see that some lines are missing. Fill those blanks (there are comments that should tell you what is missing). Once you are done, run the `podman-compose build` command to verify.
+
+```
+# ---- Build Stage ----
+FROM docker.io/library/maven:3.9.6-eclipse-temurin-21  AS builder
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy pom.xml and download dependencies first (better caching)
+COPY pom.xml .
+
+RUN mvn dependency:go-offline -B
+
+# Copy the source code
+COPY src ./src
+
+# Package the application (skip tests for faster build, optional)
+RUN mvn clean package -DskipTests
+
+# Use an official Java runtime as a parent image
+FROM registry.access.redhat.com/ubi9/openjdk-21:1.20
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the JAR file into the container
+COPY --from=builder /app/target/lab3-0.0.1-SNAPSHOT.jar app.jar
+
+# Expose the port that the application will run on
+EXPOSE 8080
+
+# Run the JAR file
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+Go back to `compose.yaml`. In there, create a new service named `spring-lab3-app-json`, have it use `Dockerfule` in build, expose the `8080` port, have it depend on `mysql-data` service on condition that it is healthy. ALso, define the -env_file with name `.env-json`. Create that file and fill it with the values from `.env-example` (make sure that the profile is `json-logs`).
+
+```
+spring-lab3-app-json:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql-data:
+        condition: service_healthy
+    env_file:
+      - .env-json
+```
+
+After you are finished, run the `podman-compose up -d` command, and then `podman-compose logs spring-lab3-app-json` and verify that the app is running. You can now use the `PersonController` and the endpoints that it exposes to create some `Person` entries. For example, run the `POST http://localhost:8080/api/person` with the body:
+
+```
+{
+    "name": "Filip",
+    "age": 25
+}
+```
+
+and then verify that the entity is created with `GET http://localhost:8080/api/person/1` request.
+
+## Task 7 - multiple app instances
+
+Once again, go back to `compose.yaml` and create an new service named `spring-lab3-app`, have it use `Dockerfule` in build, expose the `8081` port, have it depend on `mysql-data` service on condition that it is healthy. ALso, define the -env_file with name `.env`. Create that file and fill it with the values from `.env-example` (make sure that the profile is not `json-logs`).
+
+```
+spring-lab3-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      mysql-data:
+        condition: service_healthy
+    env_file:
+      - .env
+```
+
+After you are finished, run the `podman-compose up -d` command, and then `podman-compose logs spring-lab3-app` and verify that the app is running. You can now play with `PersonController` and verify that both applications use the same database. You should also notice that logging is different in these two applications.
