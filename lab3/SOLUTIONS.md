@@ -193,3 +193,38 @@ Run the application with `mvn spring-boot:run` and send the request to `http://l
 Everything is running nicely. Let's break it. The easiest way to do that is to stop our database. Do it with `podman-compose down` command. Send the request to `http://localhost:8080/actuator/health` and wait for the response (it might take 30-60 seconds). Do you notice the difference? The database is down, so the `db` component and the overall status should be different.
 
 Run the `podman-compose up -d` command again, wait for database to reestablish its connection and send the request to `http://localhost:8080/actuator/health`. Verify that everything is back to normal.
+
+Now we will write some probes ourselves. Go to the `tn.pbz.educ.lab3.resource` package and create three classes: `AlwaysUpHealthIndicator`, `AlwaysDownHealthIndicator` and `DatabasereadinessHealthIndicator`. They should all implement the `HealthIndicator` interface.
+
+1) `AlwaysUpHealthIndicator` should be implemented in a way that it always returns `"status": "UP"` response
+2) `AlwaysDownHealthIndicator` should be implemented in a way that it always returns `"status": "DOWN"` response
+3) `DatabseReadinessHealthIndicator` will be our custom database readiness probe implementation. Implement it so that it runs a query `SELECT COUNT(*) FROM person WHERE id = 1` and that it gives following responses based on the result:
+```
+{
+	"status": "UP",
+	"details": {
+		"database": "Ready"
+	}
+}
+```
+if everything is okay,
+```
+{
+	"status": "UP",
+	"details": {
+		"database": "Unexpected result"
+	}
+}
+```
+if the result it got is not expected and
+```
+{
+	"status": "UP",
+	"details": {
+		"database": "Not reachable"
+	}
+}
+```
+if database is not reacahble.
+
+Once you have implemented these three classes, run the application, send the request to `http://localhost:8080/actuator/health` and check the response.
