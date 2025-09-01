@@ -30,11 +30,36 @@ volumes:
     mysql-data:
 ```
 
-## Task 2 - running the application locally
+## Task 2 - pom.xml
 
-## Task 3 - application container
+
+
 
 ## Task 4 - logging
+
+Open `logback.xml` file. Add two `<springProfile>` tags: `json-logs` and `!json-logs`. The first we will use to configure logging in json format, and the second in a more readable console format. Add the missing configuration to both of them. The pattern for the second one should be:
+```%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-}] [%thread] %-5level %logger{36} - %msg%n```
+
+```
+<springProfile name="!json-logs">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder>
+        <pattern>%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-}] [%thread] %-5level %logger{36} - %msg%n</pattern>
+      </encoder>
+    </appender>
+  </springProfile>
+
+  <springProfile name="json-logs">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+  </springProfile>
+```
+
+Run the application in both profiles with following commands and observe the difference in logging formats:
+```mvn spring-boot:run -Dspring-boot.run.profiles=json-logs```
+```mvn spring-boot:run```
+
 
 ## Task 5 - liveness and healthness probes
 
