@@ -227,4 +227,47 @@ if the result it got is not expected and
 ```
 if database is not reacahble.
 
+```
+@Component
+public class AlwaysDownHealthIndicator implements HealthIndicator {
+
+  @Override
+  public Health health() {
+    return Health.down().build();
+  }
+}
+
+@Component
+public class AlwaysUpHealthIndicator implements HealthIndicator {
+  @Override
+  public Health health() {
+    return Health.up().build();
+  }
+}
+
+@Component
+@AllArgsConstructor
+public class DatabaseReadinessIndicator implements HealthIndicator {
+
+  private final JdbcTemplate jdbcTemplate;
+
+  @Override
+  public Health health() {
+    try {
+      // Run a lightweight query
+      Integer result = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM person WHERE id = 1", Integer.class);
+
+      if (result != null && result == 1) {
+        return Health.up().withDetail("database", "Ready").build();
+      } else {
+        return Health.down().withDetail("database", "Unexpected result").build();
+      }
+    } catch (Exception e) {
+      return Health.down().withDetail("database", "Not reachable").build();
+    }
+  }
+}
+```
+
+
 Once you have implemented these three classes, run the application, send the request to `http://localhost:8080/actuator/health` and check the response.
