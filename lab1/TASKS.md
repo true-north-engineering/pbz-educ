@@ -58,20 +58,20 @@ Containerfile / Dockerfile reference -> https://docs.docker.com/reference/docker
 
 2. Build the Containerfile and name the image todo:latest
 
-3. List and inspect the builded image
+3. List and inspect the built image
 
-4. Create container with builded image. The container should have the following properties:
+4. Create container with built image. The container should have the following properties:
     * Container name is todo
     * Container is running in background (detached mode)
-    * Set the values od the following environment variables MYSQL_ENV_MYSQL_DATABASE, MYSQL_ENV_MYSQL_USER, MYSQL_ENV_MYSQL_PASSWORD to values you have specified when starting mysql container.
-    * Set the values od the environment variables MYSQL_ENV_MYSQL_HOST to the name of mysql container and MYSQL_ENV_MYSQL_PORT to 3306
+    * Set the values of the following environment variables MYSQL_ENV_MYSQL_DATABASE, MYSQL_ENV_MYSQL_USER, MYSQL_ENV_MYSQL_PASSWORD to values you have specified when starting mysql container.
+    * Set the values of the environment variables MYSQL_ENV_MYSQL_HOST to the name of mysql container and MYSQL_ENV_MYSQL_PORT to 3306
     * Container is attached to mynet network
     * Container image used is todo:latest
     * Publish container port 30080 on any host port reserved to your user (e.g. for user10, the range is 30**10**0-30**10**9)
 
 5. Find out the port on which the container is listening on the host.
 
-6. Test the app by opening the URL ```http://box-edu.tn.hr:<port>/todo/```. Please note that the last trailing slash (/) is important, so don't omit him.
+6. Test the app by opening the URL ```http://box-edu.tn.hr:<port>/todo/```. Please note that the last trailing slash (/) is important, so don't omit it.
 
 ## Task 3 - Push the image to Nexus
 
