@@ -2,6 +2,8 @@
 
 Open OpenShift console. Login with your `IBM account`.
 
+https://console-openshift-console.pbz-edu-a0206070f21a2eaea82ecfb39c08d3bd-0000.eu-de.containers.appdomain.cloud
+
 In top right corner, click on your `Username` and select `Copy login command`.
 
 Open terminal and use `oc` to login into cluster.
