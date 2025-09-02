@@ -390,4 +390,23 @@ public class ProfileValueServiceImpl implements ProfileValueService {
 }
 ```
 
+Go to `ProfileController` class and write the new mapping method that will send a GET request to `api/profile-value` endpoint, and implement it to return the value from `ProfileValueService`.
+
+```
+@RestController
+@AllArgsConstructor
+public class ProfileController {
+
+  -- code omitted
+  private final ProfileValueService profileValueService;
+
+  -- code ommited
+
+  @GetMapping("/api/profile-value")
+  public String getProfileValue() {
+    return profileValueService.getProfileValue();
+  }
+}
+```
+
 Once again, run your applications with `podman-compose up -d` and send requestst to `api/profile-value` endpoint. Does the response change based on the profile the app is run with?
