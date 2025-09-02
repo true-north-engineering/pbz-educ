@@ -356,7 +356,7 @@ and then verify that the entity is created with `GET http://localhost:8080/api/p
 
 ## Task 7 - multiple app instances
 
-Once again, go back to `compose.yaml` and create an new service named `spring-lab3-app`, have it use `Dockerfule` in build, expose the `8081` port, have it depend on `mysql-data` service on condition that it is healthy. ALso, define the -env_file with name `.env`. Create that file and fill it with the values from `.env-example` (make sure that the profile is not `json-logs`).
+Once again, go back to `compose.yaml` and create an new service named `spring-lab3-app`, have it use `Dockerfule` in build, expose the `8081` port, have it depend on `mysql-data` service on condition that it is healthy. ALso, define the -env_file with name `.env`. Create that file and fill it with the values from `.env-example` (make sure that the profile is `local`).
 
 ```
 spring-lab3-app:
@@ -373,3 +373,21 @@ spring-lab3-app:
 ```
 
 After you are finished, run the `podman-compose up -d` command, and then `podman-compose logs spring-lab3-app` and verify that the app is running. You can now play with `PersonController` and verify that both applications use the same database. You should also notice that logging is different in these two applications.
+
+In `src/main/resources` create `application-json-logs.properties` and `application-local.properties` files. In both of them, add the `profile.value` property and assign it any string value. Then go to `tn.pbz.educ.lab3.service.impl` package and create `ProfileValueServiceImpl` that will implement the `ProfileValueService` interface. Implement it so that it reads the `profile.value` property.
+
+```
+@Service
+public class ProfileValueServiceImpl implements ProfileValueService {
+
+  @Value("${profile.value}")
+  String value;
+
+  @Override
+  public String getProfileValue() {
+    return value;
+  }
+}
+```
+
+Once again, run your applications with `podman-compose up -d` and send requestst to `api/profile-value` endpoint. Does the response change based on the profile the app is run with?
