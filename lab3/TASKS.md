@@ -165,9 +165,11 @@ Once you create the table, send the `actuator/health` request again and check th
 
 Go to `Dockerfile` file, you will see that some lines are missing. Fill those blanks (there are comments that should tell you what is missing). Once you are done, run the `podman-compose build` command to verify.
 
-Go back to `compose.yaml`. In there, create a new service named `spring-lab3-app-json`, have it use `Dockerfule` in build, expose the `8080` port, have it depend on `mysql-data` service on condition that it is healthy. ALso, define the -env_file with name `.env-json`. Create that file and fill it with the values from `.env-example` (make sure that the profile is `json-logs`).
+Go back to `compose.yaml`. In there, create a new service named `spring-lab3-app-json`, have it use `Dockerfile` in build, expose the `8080` port, have it depend on `mysql-data` service on condition that it is healthy. ALso, define the -env_file with name `.env-json`. Create that file and fill it with the values from `.env-example` (make sure that the profile is `json-logs` and that database credentials are wrong, you will see why).
 
-After you are finished, run the `podman-compose up -d` command, and then `podman-compose logs spring-lab3-app-json` and verify that the app is running. You can now use the `PersonController` and the endpoints that it exposes to create some `Person` entries. For example, run the `POST http://localhost:8080/api/person` with the body:
+After you are finished, run the `podman-compose up -d` command, and then `podman-compose logs spring-lab3-app-json`. There should be a problem with database connection. Can you tell why?
+
+Change the credentials in `.env-json` and verify that the app is running. You can now use the `PersonController` and the endpoints that it exposes to create some `Person` entries. For example, run the `POST http://localhost:8080/api/person` with the body:
 
 ```
 {
